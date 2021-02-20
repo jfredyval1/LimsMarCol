@@ -1,7 +1,22 @@
+# Definición de una función para la conversión de coordenadas sexagesimales a decimales
+
+sex2dec<- function(Gr,Mn,Sg,Hemis) {
+  Hemis<-toupper(Hemis)
+  coor<-Gr + (Mn/60) + (Sg/3600)
+  if (Hemis=="S") {
+    coor<-coor * -1
+    }
+  if (Hemis=="W") {
+    coor <-coor * -1
+  }
+  print(coor)
+}
+
 # Límites astronómicos y geográficos de Colombia
 Gr<-c(4,12,66,79)
 Mn<-c(12,26,50,02)
 Sg<-c(30,46,54,33)
+Hemis<-c("s","n","w","w")
 
 # Sexagesimal a decimal
 Coord <- Gr +(Mn/60)+(Sg/3600) 
