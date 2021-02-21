@@ -1,3 +1,6 @@
+# Librerias a utilizar
+library(leaflet)
+
 # Función para la conversión de coordenadas sexagesimales a decimales
 
 sex2dec<- function(Gr,Mn,Sg,Hemis) { # Función para convertir coordenadas
@@ -44,8 +47,8 @@ ExtCords$Label<-paste("Lugar:",ExtCords$Nombre,ExtCords$Longitud,round(ExtCords$
 
 
 # Representar en mapa
-library(leaflet)
-ExtCords %>% 
+
+Mapa1<-ExtCords %>% 
   leaflet() %>%
   addTiles() %>%
   addMarkers(popup = ExtCords$Label)%>%
@@ -104,8 +107,9 @@ MarCoords<-cbind(MarCoords[MarCoords$TipCord=="Longitud",], # Fila por punto a u
 names(MarCoords)[c(3,6,1,4)]<-c("Longitud","Latitud","lng","lat")
 
 # Representar en mapa
-library(leaflet)
-MarCoords %>% 
+
+
+Mapa2<-MarCoords %>% 
   leaflet() %>%
   addTiles() %>%
   addMarkers(popup = paste("Longitud:",round(MarCoords$lng,2),"Latitud:",round(MarCoords$lat,2)))
