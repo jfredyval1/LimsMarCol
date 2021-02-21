@@ -1,6 +1,6 @@
-# Definición de una función para la conversión de coordenadas sexagesimales a decimales
+# Función para la conversión de coordenadas sexagesimales a decimales
 
-sex2dec<- function(Gr,Mn,Sg,Hemis) {
+sex2dec<- function(Gr,Mn,Sg,Hemis) { # Función para convertir coordenadas
   Hemis<-toupper(Hemis)
   coor<-Gr + (Mn/60) + (Sg/3600)
   if (Hemis=="S") {
@@ -12,48 +12,101 @@ sex2dec<- function(Gr,Mn,Sg,Hemis) {
   print(coor)
 }
 
-# Límites astronómicos y geográficos de Colombia
-Gr<-c(4,12,66,79)
-Mn<-c(12,26,50,02)
-Sg<-c(30,46,54,33)
-Hemis<-c("s","n","w","w")
+#Puntos extremos de Colombia 
+Gr<-c(15,81,4,69,12,81,1,66,12,71,1,79) # Grados 
+Mn<-c(53,22,13,56,31,44,13,51,27,39,39,00) # Minutos
+Sg<-c(03,14,37,50,51,08,48,01,30,52,02,29) # Segundos
+Hemis<-c("n","w","s","w","n","w","n","w","n","w","n","w") # Hemisferio
+Nombre<-c("Bajo Nuevo","Bajo Nuevo","R. Amazonas","R. Amazonas", # Nombre del lugar
+          "San Andres","San Andres","Piedra del Cocuy","Piedra del Cocuy",
+          "Punta gallinas","Punta gallinas","Cabo Manglares","Cabo Manglares")
 
-# Sexagesimal a decimal
-Coord <- Gr +(Mn/60)+(Sg/3600) 
-lat<-c(Coord[1],Coord[2],Coord[1],Coord[2])
-lng<-c(Coord[3],Coord[4],Coord[4],Coord[3])
-# Crar tabla
-lims<-data.frame(lat,lng)
-lims$lng<- lims$lng * -1
-lims$lat[lims$lat==lims$lat[1]]<-lims$lat[1] * -1
-lims$Label<-paste("lngitud geográfica",round(lims$lng,2),"Latitud geográfica",round(lims$lat,2))
+# sex2dec a todos los datos
+Cors<-vector("double",length = length(Gr)) # Crear vector vacio
 
-#Puntos extremos de colombia 
-Lati<-c(15.88417,-4.226944,12.53,1.23)
-Long<-c(-81.37056,-69.94722,-81.73556,-66.85028)
-Punto<-c("Bajo Nuevo","Río Amazonas,Leticia","San Andres Islas","Piedra del Cocuy")
-Ext<-data.frame(Lati,Long,Punto)
+for (i in 1:length(Gr)) { # Aplicar función y compilar resultados en vector "Cors"
+    Cors[i]<-sex2dec(Gr[i],Mn[i],Sg[i],Hemis[i])
+    }
 
-#Puntos extremos continentales
-Lati<-c(12.45833,-4.226944,1.650556,1.23)
-Long<-c(-71.66444,-69.94722,-79.00806,-66.85028)
-Punto<-c("Punta Gallinas","Río Aamzonas","Cabo Manglares","Piedra del Cocuy")
-Ext_Cont<-data.frame(Lati,Long,Punto)
-names(Ext_Cont)<-c("lat","lng","Nombre")
+# Crear tabla de coordenadas
+ExtCords<-data.frame(Nombre,Cors,Hemis)
+ExtCords$TipCord[ExtCords$Hemis=="w"]<-"Longitud" # Crear columna de diferenciación
+ExtCords$TipCord[ExtCords$Hemis!="w"]<-"Latitud"
 
-# Etiqueta de mapa
-Ext_Cont$Label<-paste("Longitud:",Ext_Cont$lng,"Latitud:",Ext_Cont$lat,"Lugar:",Ext_Cont$Nombre)
-# Representar em mapa
+ExtCords<-cbind(ExtCords[ExtCords$TipCord=="Longitud",], # Fila por punto a ubicar
+                ExtCords[ExtCords$TipCord!="Longitud",])
+# Renombrar columnas
+names(ExtCords)[c(4,8,2,6)]<-c("Longitud","Latitud","lng","lat")
+
+# Crear label para mapa dinámico
+ExtCords$Label<-paste("Lugar:",ExtCords$Nombre,ExtCords$Longitud,round(ExtCords$lng,2),
+                      ExtCords$Latitud,round(ExtCords$lat,2))
+
+
+# Representar en mapa
 library(leaflet)
-Ext_Cont %>% 
+ExtCords %>% 
   leaflet() %>%
   addTiles() %>%
-  addMarkers(popup = Ext_Cont$Label)%>%
+  addMarkers(popup = ExtCords$Label)%>%
   addRectangles(
-    lng1=Ext$Long[3], lat1=Ext$Lati[1],
-    lng2=Ext$Long[4], lat2=Ext$Lati[2],
+    lng1=max(ExtCords$lng), lat1=max(ExtCords$lat),
+    lng2=min(ExtCords$lng), lat2=min(ExtCords$lat),
     fillColor = "transparent"
   )
 
+######################
+# Límites marítimos #
+######################
 
+# Se agrupan a continuación las coordenadas que señalas los límites marítimos de
+# Sur Occidente a Nor Oriente
 
+#Puntos extremos de Colombia 
+Gr<-c(3,84,3,84,5,84,5,79,6,79,6,79,6,78,6,78,6,78,
+      7,77,8,77,9,77,9,77,10,77,11,77,12,77,12,77,
+      12,78,12,79,11,80,11,80,11,81,10,82,14,82,14,79,15,79,
+      15,80,15,79,16,79,16,79,16,79,16,79,16,79,16,78,15,78,
+      15,78,14,78,14,78,14,77,14,74,15,73,15,71,15,69) # Grados 
+
+Mn<-c(03,46,32,19,00,19,00,52,00,14,16,03,28,47,44,18,44,18,
+      12,53,41,21,09,13,27,03,28,15,27,34,00,43,19,49,
+      30,00,30,00,50,00,00,00,00,15,49,00,59,00,59,56,30,56,
+      46,03,58,56,04,50,04,29,10,29,10,16,04,16,04,25,36,25,
+      36,38,29,38,15,19,05,40,44,30,02,27,00,40,18,29) # Minutos
+
+Sg<-c(00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,
+      39.3,20.9,07.3,50.9,00,00,00,00,00,00,00,00,00,00,00,00,
+      00,00,00,00,00,00,00,00,00,00,00,00,08,00,08,00,10,00,
+      00,55,40,40,15,32,15,20,10,20,10,40,15,40,15,50,00,50,
+      00,00,37,00,00,30,00,00,10,50,00,20,40,30,00,30) # Segundos
+Hemis<-c("n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w",
+         "n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w",
+         "n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w",
+         "n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w",
+         "n","w","n","w","n","w","n","w","n","w","n","w","n","w","n","w") # Hemisferio
+# Conversión de coordenadas
+Cors<-vector("double",length = length(Gr)) # Crear vector vacio
+
+for (i in 1:length(Gr)) { # Aplicar función y compilar resultados en vector "Cors"
+  Cors[i]<-sex2dec(Gr[i],Mn[i],Sg[i],Hemis[i])
+}
+
+# Unificación en tabla
+# Crear tabla de coordenadas
+MarCoords<-data.frame(Cors,Hemis)
+MarCoords$TipCord[MarCoords$Hemis=="w"]<-"Longitud" # Crear columna de diferenciación
+MarCoords$TipCord[MarCoords$Hemis!="w"]<-"Latitud"
+
+MarCoords<-cbind(MarCoords[MarCoords$TipCord=="Longitud",], # Fila por punto a ubicar
+                 MarCoords[MarCoords$TipCord!="Longitud",])
+# Renombrar columnas
+names(MarCoords)[c(3,6,1,4)]<-c("Longitud","Latitud","lng","lat")
+
+# Representar en mapa
+library(leaflet)
+MarCoords %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(popup = paste("Longitud:",round(MarCoords$lng,2),"Latitud:",round(MarCoords$lat,2)))
+  
