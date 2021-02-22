@@ -46,17 +46,7 @@ ExtCords$Label<-paste("Lugar:",ExtCords$Nombre,ExtCords$Longitud,round(ExtCords$
                       ExtCords$Latitud,round(ExtCords$lat,2))
 
 
-# Representar en mapa
 
-Mapa1<-ExtCords %>% 
-  leaflet() %>%
-  addTiles() %>%
-  addMarkers(popup = ExtCords$Label)%>%
-  addRectangles(
-    lng1=max(ExtCords$lng), lat1=max(ExtCords$lat),
-    lng2=min(ExtCords$lng), lat2=min(ExtCords$lat),
-    fillColor = "transparent"
-  )
 
 ######################
 # Límites marítimos #
@@ -107,6 +97,17 @@ MarCoords<-cbind(MarCoords[MarCoords$TipCord=="Longitud",], # Fila por punto a u
 names(MarCoords)[c(3,6,1,4)]<-c("Longitud","Latitud","lng","lat")
 
 # Representar en mapa
+
+
+Mapa1<-ExtCords %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(popup = ExtCords$Label)%>%
+  addRectangles(
+    lng1=max(ExtCords$lng), lat1=max(ExtCords$lat),
+    lng2=min(ExtCords$lng), lat2=min(ExtCords$lat),
+    fillColor = "transparent"
+  )
 
 
 Mapa2<-MarCoords %>% 
